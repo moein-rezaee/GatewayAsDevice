@@ -1,0 +1,9 @@
+﻿{
+  "sdk": {
+    "version": "9.0.101",
+    "rollForward": "latestFeature"
+  },
+  "projects": [
+    "SepidarGateway.Api"
+  ]
+}

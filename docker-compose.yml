@@ -1,0 +1,21 @@
+﻿services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${GATEWAY_PORT:-5090}:5090"
+    volumes:
+      - ./SepidarGateway.Api/ocelot.json:/app/ocelot.json:ro
+      - ./SepidarGateway.Api/appsettings.json:/app/appsettings.json:ro
+      - ./SepidarGateway.Api/appsettings.Development.json:/app/appsettings.Development.json:ro
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    networks:
+      - sepidar-network
+
+networks:
+  sepidar-network:
+    driver: bridge
