@@ -56,61 +56,46 @@ public class SepidarService : ISepidarService
             throw new InvalidOperationException("مسیر اندپوینت رجیستر دستگاه مشخص نشده است.");
         }
 
-        var normalizedSerial = serial.Trim();
-        var integrationId = ExtractIntegrationId(normalizedSerial, registerDevice.IntegrationIdLength);
+        var rawSerial = serial.Trim(); // بدون تغییر حروف؛ فقط Trim فضای خالی
+        var integrationId = ExtractIntegrationId(rawSerial, registerDevice.IntegrationIdLength);
         var url = CombineUrl(settings.BaseUrl, registerDevice.Endpoint);
 
-        // اگر حالت Auto است، چند حالت مرسوم کلید را امتحان می‌کنیم تا به موفقیت برسیم
-        var modes = registerDevice.KeyMode == KeyDerivationMode.Auto
-            ? new[]
-            {
-                KeyDerivationMode.Left16Digits,
-                KeyDerivationMode.RepeatDigitsTo16,
-                KeyDerivationMode.Left16Chars,
-                KeyDerivationMode.RepeatCharsTo16
-            }
-            : new[] { registerDevice.KeyMode };
+        // کلید بر اساس دستور داک: دو بار سریال پشت سر هم (و در صورت نیاز تکرار تا 16 کاراکتر)، بدون تغییر کیس
+        var keyPreview = BuildKeyFromSerial(rawSerial);
+        var enc = EncryptIntegrationId(rawSerial, integrationId, keyPreview);
 
-        foreach (var mode in modes)
+        // Debug log raw inputs used for calculation
+        _logger.LogInformation("Raw inputs => Serial: {Serial}; IntegrationID: {IntegrationID}; Key(16): {Key}", rawSerial, integrationId, keyPreview);
+
+        var request = new RegisterDeviceUpstreamRequest
         {
-            var enc = EncryptIntegrationId(normalizedSerial, integrationId, mode);
-            _logger.LogDebug("Sepidar encryption prepared. Mode={Mode}; IntegrationID={IntegrationID}", mode, integrationId);
+            Cypher = enc.Cipher,
+            IV = enc.Iv,
+            IntegrationID = integrationId
+        };
 
-            var request = new RegisterDeviceUpstreamRequest
-            {
-                Cypher = enc.Cipher,
-                IV = enc.Iv,
-                IntegrationID = integrationId
-            };
+        // Log outgoing request details (URL, headers, body) and ready-to-run curl commands
+        var jsonBody = JsonSerializer.Serialize(request, _jsonOptions);
+        var (curlBash, curlPwsh) = BuildCurlCommands(url, jsonBody);
+        _logger.LogInformation(
+            "درخواست رجیستر دستگاه سپیدار در شُرُوع ارسال\nURL: {Url}\nHeaders:\n  Content-Type: application/json\nBody (Postman raw JSON):\n{Body}\nCurl (bash/sh):\n{CurlBash}\nCurl (PowerShell):\n{CurlPwsh}",
+            url, jsonBody, curlBash, curlPwsh);
 
-            // Log outgoing request details (URL, headers, body) and ready-to-run curl commands
-            var jsonBody = JsonSerializer.Serialize(request, _jsonOptions);
-            var (curlBash, curlPwsh) = BuildCurlCommands(url, jsonBody);
-            _logger.LogInformation(
-                "درخواست رجیستر دستگاه سپیدار در شُرُوع ارسال\nMode: {Mode}\nURL: {Url}\nHeaders:\n  Content-Type: application/json\nBody (Postman raw JSON):\n{Body}\nCurl (bash/sh):\n{CurlBash}\nCurl (PowerShell):\n{CurlPwsh}",
-                mode, url, jsonBody, curlBash, curlPwsh);
-
-            try
+        try
+        {
+            var headers = new Dictionary<string, string> { ["Accept"] = "application/json" };
+            var payload = await _httpClientWrapper.PostRawAsync(url, request, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(payload))
             {
-                var result = await _httpClientWrapper.PostAsync<RegisterDeviceUpstreamRequest, JsonDocument>(
-                    url,
-                    request,
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-                return result;
+                return null;
             }
-            catch (HttpRequestException ex) when (ex.Message.Contains("عدم تطابق دستگاه") || ex.Message.Contains("400"))
-            {
-                _logger.LogWarning("کلید با Mode={Mode} تطابق نداشت. تلاش با حالت بعدی...", mode);
-                // ادامه با حالت بعدی
-            }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-            {
-                _logger.LogError(ex, "فراخوانی سرویس رجیستر دستگاه سپیدار با خطا مواجه شد.");
-                throw;
-            }
+            return JsonDocument.Parse(payload);
         }
-
-        return null;
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            _logger.LogError(ex, "فراخوانی سرویس رجیستر دستگاه سپیدار با خطا مواجه شد.");
+            throw;
+        }
     }
 
     private static (string Bash, string PowerShell) BuildCurlCommands(string url, string jsonBody)
@@ -148,9 +133,9 @@ public class SepidarService : ISepidarService
         return integrationId;
     }
 
-    private static (string Cipher, string Iv) EncryptIntegrationId(string serial, int integrationId, KeyDerivationMode keyMode)
+    private static (string Cipher, string Iv) EncryptIntegrationId(string serial, int integrationId, string key16)
     {
-        var key = BuildEncryptionKey(serial, keyMode);
+        var key = Encoding.UTF8.GetBytes(key16);
         using var aes = Aes.Create();
         aes.KeySize = 128;
         aes.BlockSize = 128;
@@ -166,58 +151,28 @@ public class SepidarService : ISepidarService
         return (Convert.ToBase64String(cipherBytes), Convert.ToBase64String(aes.IV));
     }
 
-    private static byte[] BuildEncryptionKey(string serial, KeyDerivationMode mode)
+    private static string BuildKeyFromSerial(string serial)
     {
-        // کلید از 16 کاراکتر/رقم سمت چپ سریال ساخته می‌شود.
         var src = (serial ?? string.Empty).Trim();
         if (string.IsNullOrEmpty(src))
         {
             throw new InvalidOperationException("سریال دستگاه نامعتبر است.");
         }
 
-        string keyStr = mode switch
+        // طبق داک: کلید = سریال + سریال (و در صورت نیاز تکرار تا طول 16)، بدون تغییر حروف
+        var doubled = string.Concat(src, src);
+        if (doubled.Length >= 16)
         {
-            KeyDerivationMode.Left16Digits => BuildFromDigits(src),
-            KeyDerivationMode.RepeatDigitsTo16 => RepeatTo16(new string(src.Where(char.IsDigit).ToArray())),
-            KeyDerivationMode.RepeatCharsTo16 => RepeatTo16(src.ToUpperInvariant()),
-            _ => BuildFromChars(src)
-        };
-
-        return Encoding.UTF8.GetBytes(keyStr);
-
-        static string BuildFromChars(string s)
-        {
-            var u = s.ToUpperInvariant();
-            return u.Length >= 16 ? u[..16] : u.PadRight(16, '0');
+            return doubled[..16];
         }
 
-        static string BuildFromDigits(string s)
+        var sb = new StringBuilder(16);
+        while (sb.Length < 16)
         {
-            var digits = new string(s.Where(char.IsDigit).ToArray());
-            if (digits.Length >= 16)
-            {
-                return digits[..16];
-            }
-
-            return digits.PadRight(16, '0');
+            sb.Append(src);
         }
 
-        static string RepeatTo16(string seed)
-        {
-            if (string.IsNullOrEmpty(seed))
-            {
-                throw new InvalidOperationException("سریال فاقد محتوای کافی برای ساخت کلید است.");
-            }
-
-            var sb = new StringBuilder(16);
-            while (sb.Length < 16)
-            {
-                var take = Math.Min(seed.Length, 16 - sb.Length);
-                sb.Append(seed.AsSpan(0, take));
-            }
-
-            return sb.ToString();
-        }
+        return sb.ToString()[..16];
     }
 
     private static string CombineUrl(string baseUrl, string endpoint)

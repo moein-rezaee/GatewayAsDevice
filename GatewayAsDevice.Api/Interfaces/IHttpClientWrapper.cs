@@ -27,4 +27,11 @@ public interface IHttpClientWrapper
         IDictionary<string, string>? headers = null,
         IDictionary<string, string?>? queryParameters = null,
         CancellationToken cancellationToken = default);
+
+    Task<string?> PostRawAsync<TRequest>(
+        string url,
+        TRequest? body = default,
+        IDictionary<string, string>? headers = null,
+        IDictionary<string, string?>? queryParameters = null,
+        CancellationToken cancellationToken = default);
 }

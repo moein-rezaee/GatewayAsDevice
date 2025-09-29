@@ -94,7 +94,7 @@ app.MapPost(deviceRegisterRouteV1, async (
             return Results.NoContent();
         }
 
-        return Results.Content(response.RootElement.GetRawText(), "application/json");
+        return Results.Json(response.RootElement);
     }
     catch (ArgumentException ex)
     {

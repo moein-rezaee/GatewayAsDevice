@@ -55,6 +55,45 @@ public class HttpClientWrapper : IHttpClientWrapper
         CancellationToken cancellationToken = default) =>
         SendAsync<object?, TResponse>(HttpMethod.Delete, url, default, headers, queryParameters, cancellationToken);
 
+    public async Task<string?> PostRawAsync<TRequest>(
+        string url,
+        TRequest? body = default,
+        IDictionary<string, string>? headers = null,
+        IDictionary<string, string?>? queryParameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            throw new ArgumentException("URL cannot be null or whitespace.", nameof(url));
+        }
+
+        var targetUrl = AppendQueryString(url, queryParameters);
+        using var request = new HttpRequestMessage(HttpMethod.Post, targetUrl);
+
+        ApplyHeaders(request, headers);
+
+        if (body is not null)
+        {
+            request.Content = CreateContent(body);
+        }
+
+        using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+
+        var payload = response.Content is null
+            ? string.Empty
+            : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var statusCode = (int)response.StatusCode;
+            var reason = response.ReasonPhrase ?? string.Empty;
+            var message = $"Upstream error {statusCode} {reason}. Body: {payload}";
+            throw new HttpRequestException(message);
+        }
+
+        return string.IsNullOrWhiteSpace(payload) ? null : payload;
+    }
+
     private async Task<TResponse?> SendAsync<TRequest, TResponse>(
         HttpMethod method,
         string url,
