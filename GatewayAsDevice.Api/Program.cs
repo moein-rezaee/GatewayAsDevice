@@ -2,9 +2,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using DotNetEnv;
-using MMLib.SwaggerForOcelot.DependencyInjection;
-using Ocelot.DependencyInjection;
-using Ocelot.Middleware;
+using Microsoft.OpenApi.Models;
 using SepidarGateway.Api.Interfaces;
 using SepidarGateway.Api.Models;
 using SepidarGateway.Api.Options;
@@ -30,25 +28,27 @@ builder.Configuration
     .SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
 var swaggerSection = builder.Configuration.GetSection("Gateway:Swagger");
 var swaggerRoutePrefix = swaggerSection.GetValue<string>("RoutePrefix") ?? "swagger";
 var swaggerDocTitle = swaggerSection.GetValue<string>("DocumentTitle") ?? "Sepidar Gateway";
-var swaggerGeneratorPath = swaggerSection.GetValue<string>("GeneratorPath") ?? "/swagger/docs";
 
 var healthSection = builder.Configuration.GetSection("Gateway:Health");
 var healthPath = healthSection.GetValue<string>("Path") ?? "/health";
 
+// Build device route based on Sepidar upstream path with version prefix
+var sepidarRegisterPath = builder.Configuration.GetValue<string>("Sepidar:RegisterDevice:Endpoint") ?? "/api/Devices/Register";
+var deviceRegisterRouteV1 = CombineRoute("/v1", sepidarRegisterPath);
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddOcelot(builder.Configuration);
-builder.Services.AddSwaggerForOcelot(builder.Configuration, setup =>
+builder.Services.AddSwaggerGen(options =>
 {
-    setup.GenerateDocsForGatewayItSelf = true;
-    setup.DownstreamDocsCacheExpire = TimeSpan.Zero;
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = swaggerDocTitle,
+        Version = "v1"
+    });
 });
 builder.Services.AddHttpClient<IHttpClientWrapper, HttpClientWrapper>();
 builder.Services.Configure<SepidarOptions>(builder.Configuration.GetSection("Sepidar"));
@@ -62,22 +62,21 @@ if (builder.Configuration.GetValue<bool>("Gateway:UseHttpsRedirection", true))
 }
 
 app.UseSwagger();
-app.UseSwaggerForOcelotUI(opt =>
+app.UseSwaggerUI(c =>
 {
-    opt.PathToSwaggerGenerator = swaggerGeneratorPath;
-}, uiOpt =>
-{
-    uiOpt.DocumentTitle = swaggerDocTitle;
-    uiOpt.RoutePrefix = swaggerRoutePrefix;
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{swaggerDocTitle} v1");
+    c.DocumentTitle = swaggerDocTitle;
+    c.RoutePrefix = swaggerRoutePrefix;
 });
 
 app.MapGet(healthPath, () => Results.Ok(new
 {
     status = "Healthy",
     timestamp = DateTimeOffset.UtcNow
-}));
+}))
+    .WithTags("Gateway");
 
-app.MapPost("/gateway/sepidar/device/register", async (
+app.MapPost(deviceRegisterRouteV1, async (
     RegisterDeviceGatewayRequest request,
     ISepidarService sepidarService,
     CancellationToken cancellationToken) =>
@@ -115,6 +114,7 @@ app.MapPost("/gateway/sepidar/device/register", async (
     }
 })
 .WithName("SepidarRegisterDevice")
+.WithTags("Device")
 .WithOpenApi(operation =>
 {
     operation.Summary = "ثبت دستگاه در سپیدار";
@@ -122,11 +122,26 @@ app.MapPost("/gateway/sepidar/device/register", async (
     return operation;
 });
 
-app.MapGet("/gateway/sepidar/device/register", () => Results.BadRequest(new { message = "برای ثبت دستگاه از متد POST استفاده کنید." }))
+app.MapGet(deviceRegisterRouteV1, () => Results.BadRequest(new { message = "برای ثبت دستگاه از متد POST استفاده کنید." }))
     .ExcludeFromDescription();
 
 app.MapFallback(() => Results.Problem("اندپوینت مورد نظر یافت نشد."));
 
-await app.UseOcelot();
-
 await app.RunAsync();
+
+static string CombineRoute(string versionPrefix, string endpoint)
+{
+    versionPrefix ??= string.Empty;
+    endpoint ??= string.Empty;
+
+    string Normalize(string s, bool leading)
+        => string.IsNullOrWhiteSpace(s)
+            ? string.Empty
+            : leading
+                ? "/" + s.Trim().Trim('/')
+                : s.Trim().Trim('/');
+
+    var v = Normalize(versionPrefix, leading: true);
+    var ep = Normalize(endpoint, leading: false);
+    return string.IsNullOrEmpty(ep) ? v : $"{v}/{ep}";
+}
