@@ -1,10 +1,4 @@
-﻿using System.Net.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.OpenApi;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using SepidarGateway.Api.Interfaces;
+﻿using SepidarGateway.Api.Interfaces;
 using SepidarGateway.Api.Models;
 
 namespace SepidarGateway.Api.Endpoints.Device;
@@ -52,8 +46,6 @@ public static class RegisterDeviceEndpoints
     private static async Task<IResult> RegisterDeviceAsync(
         RegisterDeviceGatewayRequest request,
         ISepidarService sepidarService,
-        ICacheWrapper cache,
-        IConfiguration configuration,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Serial))
@@ -68,23 +60,6 @@ public static class RegisterDeviceEndpoints
             {
                 return Results.NoContent();
             }
-
-            // Secure cache of final response + serial for later stages
-            var serial = request.Serial.Trim();
-            var entry = new RegisterDeviceCacheEntry
-            {
-                Serial = serial,
-                Response = responseNode,
-                CachedAt = DateTimeOffset.UtcNow
-            };
-            var expireMinutes = configuration.GetValue<int?>("Gateway:Cache:RegisterDevice:ExpirationMinutes") ?? 10;
-            var options = new CacheOptions
-            {
-                Secure = true,
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
-            };
-            cache.Set(BuildCacheKey(serial), entry, options);
-            cache.Set(BuildCurrentCacheKey(), entry, options);
 
             return Results.Json(responseNode);
         }
@@ -110,6 +85,5 @@ public static class RegisterDeviceEndpoints
     private static IResult RequirePostForRegister()
         => Results.BadRequest(new { message = "برای ثبت دستگاه از متد POST استفاده کنید." });
 
-    private static string BuildCacheKey(string serial) => $"device:register:{serial}";
-    private static string BuildCurrentCacheKey() => "device:register:current";
+    // caching handled inside SepidarService
 }

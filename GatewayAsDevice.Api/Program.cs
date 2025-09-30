@@ -51,6 +51,7 @@ builder.Services.Configure<SepidarOptions>(builder.Configuration.GetSection("Sep
 builder.Services.AddScoped<ISepidarService, SepidarService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICacheWrapper, MemoryCacheWrapper>();
+builder.Services.AddSingleton<ICurlBuilder, CurlBuilder>();
 
 var app = builder.Build();
 

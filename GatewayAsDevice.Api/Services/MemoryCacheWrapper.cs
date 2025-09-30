@@ -4,7 +4,6 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using SepidarGateway.Api.Interfaces;
 using SepidarGateway.Api.Models;
 
@@ -14,15 +13,13 @@ public class MemoryCacheWrapper : ICacheWrapper
 {
     private readonly IMemoryCache _cache;
     private readonly byte[] _key; // 32 bytes برای AES-GCM-256
-    private readonly ILogger<MemoryCacheWrapper> _logger;
     private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
 
     private const string Alg = "AESGCM256";
 
-    public MemoryCacheWrapper(IMemoryCache cache, IConfiguration config, ILogger<MemoryCacheWrapper> logger)
+    public MemoryCacheWrapper(IMemoryCache cache, IConfiguration config)
     {
         _cache = cache;
-        _logger = logger;
         _key = LoadOrCreateKey(config);
     }
 
@@ -57,9 +54,8 @@ public class MemoryCacheWrapper : ICacheWrapper
             {
                 return Decrypt<T>(enc);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogWarning(ex, "خطا در دیکریپت مقدار کش برای کلید {Key}", key);
                 return default;
             }
         }
@@ -160,8 +156,6 @@ public class MemoryCacheWrapper : ICacheWrapper
         {
             var generated = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
             Environment.SetEnvironmentVariable("CACHE_ENCRYPTION_KEY", generated); // فقط برای پروسس جاری
-            _logger.LogWarning("کلید رمز کش یافت نشد. یک کلید تصادفی موقت تولید شد. آن را در .env ذخیره کنید: {Line}",
-                $"CACHE_ENCRYPTION_KEY={generated}");
             str = generated;
         }
 
@@ -217,4 +211,3 @@ public class MemoryCacheWrapper : ICacheWrapper
         return SHA256.HashData(input);
     }
 }
-
