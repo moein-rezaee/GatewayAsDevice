@@ -35,28 +35,28 @@ public class SepidarService : ISepidarService
     {
         if (string.IsNullOrWhiteSpace(serial))
         {
-            throw new ArgumentException("????? ????? ?????? ?????? ???.", nameof(serial));
+            throw new ArgumentException("ارسال سریال دستگاه الزامی است.", nameof(serial));
         }
 
-        var settings = _options.Value ?? throw new InvalidOperationException("??????? ?????? ???????? ???? ???.");
-        var registerDevice = settings.RegisterDevice ?? throw new InvalidOperationException("???????? ?????? ?????? ???? ???.");
+        var settings = _options.Value ?? throw new InvalidOperationException("تنظیمات سپیدار مقداردهی نشده است.");
+        var registerDevice = settings.RegisterDevice ?? throw new InvalidOperationException("پیکربندی رجیستر دستگاه یافت نشد.");
 
         if (string.IsNullOrWhiteSpace(settings.BaseUrl))
         {
-            throw new InvalidOperationException("???? ???? ?????? ?? appsettings ????? ???? ???.");
+            throw new InvalidOperationException("آدرس پایه سپیدار در appsettings تنظیم نشده است.");
         }
 
         if (string.IsNullOrWhiteSpace(registerDevice.Endpoint))
         {
-            throw new InvalidOperationException("???? ???????? ?????? ?????? ???? ???? ???.");
+            throw new InvalidOperationException("مسیر اندپوینت رجیستر دستگاه مشخص نشده است.");
         }
 
-        var rawSerial = serial.Trim(); // ???? ????? ????? ??? Trim ???? ????
+        var rawSerial = serial.Trim(); // بدون تغییر حروف؛ فقط Trim فضای خالی
         var integrationId = ExtractIntegrationId(rawSerial, registerDevice.IntegrationIdLength);
         var url = CombineUrl(settings.BaseUrl, registerDevice.Endpoint);
 
         var keyPreview = BuildKeyFromSerial(rawSerial);
-        var enc = EncryptIntegrationId(rawSerial, integrationId, keyPreview);
+        var enc = EncryptIntegrationId(integrationId, keyPreview);
 
         var request = new RegisterDeviceUpstreamRequest
         {
@@ -94,7 +94,7 @@ public class SepidarService : ISepidarService
                     var (ok, xml, usedStrategy) = TryDecryptPublicKeyWithStrategies(cypherB64, ivB64, rawSerial);
                     if (!ok)
                     {
-                        throw new InvalidOperationException("???????? ???? ????? ?? ???? ?????? ?????? ???. ???????? ???? AES ?????? ???? ??? ???.");
+                        throw new InvalidOperationException("رمزگشایی کلید عمومی از پاسخ رجیستر ناموفق بود. احتمالاً کلید AES نادرست مشتق شده است.");
                     }
 
                     // Attempt to parse XML for RSA parameters
@@ -151,25 +151,25 @@ public class SepidarService : ISepidarService
     {
         if (digitCount <= 0)
         {
-            throw new InvalidOperationException("??? ????? ???????????? ???? ??????? ?? ??? ????.");
+            throw new InvalidOperationException("طول شناسه یکپارچه‌سازی باید بزرگ‌تر از صفر باشد.");
         }
 
         var digits = new string(serial.Where(char.IsDigit).ToArray());
         if (digits.Length < digitCount)
         {
-            throw new InvalidOperationException($"????? ???? ????? {digitCount} ??? ????? ????.");
+            throw new InvalidOperationException($"سریال باید حداقل {digitCount} رقم داشته باشد.");
         }
 
         var integrationIdSlice = digits[..digitCount];
         if (!int.TryParse(integrationIdSlice, NumberStyles.None, CultureInfo.InvariantCulture, out var integrationId))
         {
-            throw new InvalidOperationException("????? ????? ????? ???????????? ?? ??? ???? ?????.");
+            throw new InvalidOperationException("امکان تبدیل شناسه یکپارچه‌سازی به عدد وجود ندارد.");
         }
 
         return integrationId;
     }
 
-    private static (string Cipher, string Iv) EncryptIntegrationId(string serial, int integrationId, string key16)
+    private static (string Cipher, string Iv) EncryptIntegrationId(int integrationId, string key16)
     {
         var key = Encoding.UTF8.GetBytes(key16);
         using var aes = Aes.Create();
@@ -189,9 +189,9 @@ public class SepidarService : ISepidarService
 
     private static string DecryptToXmlString(string cypherBase64, string ivBase64, string key16)
     {
-        if (string.IsNullOrWhiteSpace(cypherBase64)) throw new ArgumentException("Cypher ???? ???.", nameof(cypherBase64));
-        if (string.IsNullOrWhiteSpace(ivBase64)) throw new ArgumentException("IV ???? ???.", nameof(ivBase64));
-        if (string.IsNullOrWhiteSpace(key16) || key16.Length != 16) throw new ArgumentException("???? AES ??????? ???.", nameof(key16));
+        if (string.IsNullOrWhiteSpace(cypherBase64)) throw new ArgumentException("Cypher خالی است.", nameof(cypherBase64));
+        if (string.IsNullOrWhiteSpace(ivBase64)) throw new ArgumentException("IV خالی است.", nameof(ivBase64));
+        if (string.IsNullOrWhiteSpace(key16) || key16.Length != 16) throw new ArgumentException("کلید AES نامعتبر است.", nameof(key16));
 
         var cipherBytes = Convert.FromBase64String(cypherBase64);
         var iv = Convert.FromBase64String(ivBase64);
@@ -261,14 +261,14 @@ public class SepidarService : ISepidarService
 
     private static string CutOrRepeat(string s, int len)
     {
-        if (string.IsNullOrEmpty(s)) throw new InvalidOperationException("????? ???? ??????? ???? ???? ???.");
+        if (string.IsNullOrEmpty(s)) throw new InvalidOperationException("سریال برای استخراج کلید خالی است.");
         if (s.Length >= len) return s[..len];
         return RepeatToLength(s, len);
     }
 
     private static string RepeatToLength(string s, int len)
     {
-        if (string.IsNullOrEmpty(s)) throw new InvalidOperationException("???? ????? ???? ????? ???? ???.");
+        if (string.IsNullOrEmpty(s)) throw new InvalidOperationException("رشته ورودی برای تکرار خالی است.");
         var sb = new StringBuilder(len);
         while (sb.Length < len) sb.Append(s);
         return sb.ToString()[..len];
@@ -359,10 +359,10 @@ public class SepidarService : ISepidarService
         var src = (serial ?? string.Empty).Trim();
         if (string.IsNullOrEmpty(src))
         {
-            throw new InvalidOperationException("????? ?????? ??????? ???.");
+            throw new InvalidOperationException("سریال دستگاه نامعتبر است.");
         }
 
-        // ??? ???: ???? = ????? + ????? (? ?? ???? ???? ????? ?? ??? 16)? ???? ????? ????
+        // طبق داک: کلید = سریال + سریال (و در صورت نیاز تکرار تا طول 16)، بدون تغییر حروف
         var doubled = string.Concat(src, src);
         if (doubled.Length >= 16)
         {
@@ -385,7 +385,7 @@ public class SepidarService : ISepidarService
             return new Uri(baseUri, endpoint).ToString();
         }
 
-        throw new InvalidOperationException("???? ???? ?????? ????? ????.");
+        throw new InvalidOperationException("آدرس پایه سپیدار معتبر نیست.");
     }
 
     // Keys used for caching register response
@@ -398,13 +398,13 @@ public class SepidarService : ISepidarService
         var entry = _cache.Get<RegisterDeviceCacheEntry>(BuildRegisterCurrentKey());
         if (entry is null || entry.Response is null || string.IsNullOrWhiteSpace(entry.Serial))
         {
-            throw new InvalidOperationException("???????? ?????? ?????? ?? ?? ???? ???. ????? ?????? ?????? ?? ???????? ????.");
+            throw new InvalidOperationException("داده‌های رجیستر دستگاه در کش یافت نشد. ابتدا رجیستر دستگاه را فراخوانی کنید.");
         }
 
-        var settings = _options.Value ?? throw new InvalidOperationException("??????? ?????? ???????? ???? ???.");
+        var settings = _options.Value ?? throw new InvalidOperationException("تنظیمات سپیدار مقداردهی نشده است.");
         if (string.IsNullOrWhiteSpace(settings.BaseUrl))
         {
-            throw new InvalidOperationException("???? ???? ?????? ????? ???? ???.");
+            throw new InvalidOperationException("آدرس پایه سپیدار تنظیم نشده است.");
         }
 
         var integrationIdLen = settings.RegisterDevice?.IntegrationIdLength > 0 ? settings.RegisterDevice.IntegrationIdLength : 4;
@@ -412,14 +412,14 @@ public class SepidarService : ISepidarService
 
         // Credentials from env
         var userName = Environment.GetEnvironmentVariable("LOGIN_USERNAME")
-            ?? throw new InvalidOperationException("LOGIN_USERNAME ????? ???? ???.");
+            ?? throw new InvalidOperationException("LOGIN_USERNAME تنظیم نشده است.");
         var password = Environment.GetEnvironmentVariable("LOGIN_PASSWORD")
-            ?? throw new InvalidOperationException("LOGIN_PASSWORD ????? ???? ???.");
+            ?? throw new InvalidOperationException("LOGIN_PASSWORD تنظیم نشده است.");
 
         // Extract RSA params from cached response
         if (!TryGetRsaParameters(entry.Response, out var rsaParams))
         {
-            throw new InvalidOperationException("???? ????? ???? ???????? ???? ???. ????? ?????? ?????? ?? ???????? ????.");
+            throw new InvalidOperationException("کلید عمومی برای رمزنگاری یافت نشد. ابتدا رجیستر دستگاه را فراخوانی کنید.");
         }
 
         var arbitraryGuid = Guid.NewGuid();
@@ -532,3 +532,12 @@ public class SepidarService : ISepidarService
         return r;
     }
 }
+
+
+
+
+
+
+
+
+
