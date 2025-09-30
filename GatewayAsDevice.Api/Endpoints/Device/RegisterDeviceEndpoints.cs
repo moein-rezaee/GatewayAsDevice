@@ -52,6 +52,8 @@ public static class RegisterDeviceEndpoints
     private static async Task<IResult> RegisterDeviceAsync(
         RegisterDeviceGatewayRequest request,
         ISepidarService sepidarService,
+        ICacheWrapper cache,
+        IConfiguration configuration,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Serial))
@@ -66,6 +68,21 @@ public static class RegisterDeviceEndpoints
             {
                 return Results.NoContent();
             }
+
+            // Secure cache of final response + serial for later stages
+            var serial = request.Serial.Trim();
+            var entry = new RegisterDeviceCacheEntry
+            {
+                Serial = serial,
+                Response = responseNode,
+                CachedAt = DateTimeOffset.UtcNow
+            };
+            var expireMinutes = configuration.GetValue<int?>("Gateway:Cache:RegisterDevice:ExpirationMinutes") ?? 10;
+            cache.Set(BuildCacheKey(serial), entry, new CacheOptions
+            {
+                Secure = true,
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
+            });
 
             return Results.Json(responseNode);
         }
@@ -90,4 +107,6 @@ public static class RegisterDeviceEndpoints
     // Handler: GET on register route (not allowed)
     private static IResult RequirePostForRegister()
         => Results.BadRequest(new { message = "برای ثبت دستگاه از متد POST استفاده کنید." });
+
+    private static string BuildCacheKey(string serial) => $"device:register:{serial}";
 }
