@@ -1,4 +1,4 @@
-﻿namespace SepidarGateway.Api.Options;
+﻿namespace SepidarGateway.Api.Models;
 
 public class SepidarOptions
 {
@@ -21,3 +21,4 @@ public class SepidarRegisterDeviceOptions
     public int IntegrationIdLength { get; set; } = 4;
     public KeyDerivationMode KeyMode { get; set; } = KeyDerivationMode.Left16Digits;
 }
+

@@ -6,7 +6,7 @@ using DotNetEnv;
 using Microsoft.OpenApi.Models;
 using SepidarGateway.Api.Interfaces;
 using SepidarGateway.Api.Models;
-using SepidarGateway.Api.Options;
+using SepidarGateway.Api.Models;
 using SepidarGateway.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);

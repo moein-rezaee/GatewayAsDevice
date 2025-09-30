@@ -1,18 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Net.Http;
+﻿using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using System.Text.Encodings.Web;
 using Microsoft.Extensions.Options;
 using SepidarGateway.Api.Interfaces;
-using SepidarGateway.Api.Options;
+using SepidarGateway.Api.Models;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
-using SepidarGateway.Api.Models;
 
 namespace SepidarGateway.Api.Services;
 
