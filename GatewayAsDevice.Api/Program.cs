@@ -54,6 +54,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddHttpClient<IHttpClientWrapper, HttpClientWrapper>();
 builder.Services.Configure<SepidarOptions>(builder.Configuration.GetSection("Sepidar"));
 builder.Services.AddScoped<ISepidarService, SepidarService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<ICacheWrapper, MemoryCacheWrapper>();
 
 var app = builder.Build();
 
