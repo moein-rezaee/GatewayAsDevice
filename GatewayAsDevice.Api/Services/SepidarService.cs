@@ -12,6 +12,7 @@ using SepidarGateway.Api.Interfaces;
 using SepidarGateway.Api.Options;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
+using SepidarGateway.Api.Models;
 
 namespace SepidarGateway.Api.Services;
 
@@ -329,12 +330,6 @@ public class SepidarService : ISepidarService
         throw new InvalidOperationException("آدرس پایه سپیدار معتبر نیست.");
     }
 
-    private sealed record RegisterDeviceUpstreamRequest
-    {
-        public string Cypher { get; init; } = string.Empty;
-        public string IV { get; init; } = string.Empty;
-        public int IntegrationID { get; init; }
-    }
 }
 
 
