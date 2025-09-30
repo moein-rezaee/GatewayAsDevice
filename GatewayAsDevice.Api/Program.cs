@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Http;
 using DotNetEnv;
 using Microsoft.OpenApi.Models;
@@ -88,13 +89,13 @@ app.MapPost(deviceRegisterRouteV1, async (
 
     try
     {
-        var response = await sepidarService.RegisterDeviceAsync(request.Serial, cancellationToken).ConfigureAwait(false);
-        if (response is null)
+        var responseNode = await sepidarService.RegisterDeviceAsync(request.Serial, cancellationToken).ConfigureAwait(false);
+        if (responseNode is null)
         {
             return Results.NoContent();
         }
 
-        return Results.Json(response.RootElement);
+        return Results.Json(responseNode);
     }
     catch (ArgumentException ex)
     {

@@ -10,6 +10,8 @@ using System.Text.Encodings.Web;
 using Microsoft.Extensions.Options;
 using SepidarGateway.Api.Interfaces;
 using SepidarGateway.Api.Options;
+using System.Text.Json.Nodes;
+using System.Xml.Linq;
 
 namespace SepidarGateway.Api.Services;
 
@@ -36,7 +38,7 @@ public class SepidarService : ISepidarService
         _logger = logger;
     }
 
-    public async Task<JsonDocument?> RegisterDeviceAsync(string serial, CancellationToken cancellationToken = default)
+    public async Task<JsonNode?> RegisterDeviceAsync(string serial, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(serial))
         {
@@ -89,7 +91,48 @@ public class SepidarService : ISepidarService
             {
                 return null;
             }
-            return JsonDocument.Parse(payload);
+
+            // Parse upstream JSON to a mutable node
+            var root = JsonNode.Parse(payload) as JsonObject;
+            if (root is null)
+            {
+                // Fallback: return raw text as a single field
+                return new JsonObject
+                {
+                    ["Raw"] = payload
+                };
+            }
+
+            // Try to find Cypher and IV either at root or nested (e.g., Data)
+            if (TryLocateCypherAndIv(root, out var hostObject, out var cypherB64, out var ivB64))
+            {
+                try
+                {
+                    var key16 = BuildKeyFromSerial(rawSerial);
+                    var xml = DecryptToXmlString(cypherB64, ivB64, key16);
+
+                    // Attempt to parse XML for RSA parameters
+                    var (modulus, exponent) = TryParseRsaXml(xml);
+
+                    // Attach results next to the found Cypher/IV
+                    hostObject["PublicKeyXml"] = xml;
+                    if (!string.IsNullOrWhiteSpace(modulus) || !string.IsNullOrWhiteSpace(exponent))
+                    {
+                        hostObject["PublicKey"] = new JsonObject
+                        {
+                            ["Modulus"] = modulus,
+                            ["Exponent"] = exponent
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "رمزگشایی پاسخ سپیدار یا استخراج XML با خطا مواجه شد.");
+                    hostObject["PublicKeyDecryptError"] = ex.Message;
+                }
+            }
+
+            return root;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
@@ -149,6 +192,107 @@ public class SepidarService : ISepidarService
         var cipherBytes = encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
 
         return (Convert.ToBase64String(cipherBytes), Convert.ToBase64String(aes.IV));
+    }
+
+    private static string DecryptToXmlString(string cypherBase64, string ivBase64, string key16)
+    {
+        if (string.IsNullOrWhiteSpace(cypherBase64)) throw new ArgumentException("Cypher خالی است.", nameof(cypherBase64));
+        if (string.IsNullOrWhiteSpace(ivBase64)) throw new ArgumentException("IV خالی است.", nameof(ivBase64));
+        if (string.IsNullOrWhiteSpace(key16) || key16.Length != 16) throw new ArgumentException("کلید AES نامعتبر است.", nameof(key16));
+
+        var cipherBytes = Convert.FromBase64String(cypherBase64);
+        var iv = Convert.FromBase64String(ivBase64);
+        var key = Encoding.UTF8.GetBytes(key16);
+
+        using var aes = Aes.Create();
+        aes.KeySize = 128;
+        aes.BlockSize = 128;
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.PKCS7;
+        aes.Key = key;
+        aes.IV = iv;
+
+        using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+        var plainBytes = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
+        var xml = Encoding.UTF8.GetString(plainBytes).Trim();
+        return xml;
+    }
+
+    private static (string Modulus, string Exponent) TryParseRsaXml(string xml)
+    {
+        try
+        {
+            var doc = XDocument.Parse(xml);
+            var root = doc.Root;
+            if (root is null) return (string.Empty, string.Empty);
+            var modulus = root.Element("Modulus")?.Value ?? string.Empty;
+            var exponent = root.Element("Exponent")?.Value ?? string.Empty;
+            return (modulus, exponent);
+        }
+        catch
+        {
+            return (string.Empty, string.Empty);
+        }
+    }
+
+    private static bool TryLocateCypherAndIv(JsonObject root, out JsonObject host, out string cypherB64, out string ivB64)
+    {
+        // Case-insensitive search at root
+        if (TryGetStringProperty(root, "Cypher", out cypherB64) && TryGetStringProperty(root, "IV", out ivB64))
+        {
+            host = root;
+            return true;
+        }
+
+        // Common wrapper: Data or data
+        foreach (var key in new[] { "Data", "data", "Result", "result" })
+        {
+            if (root[key] is JsonObject obj)
+            {
+                if (TryGetStringProperty(obj, "Cypher", out cypherB64) && TryGetStringProperty(obj, "IV", out ivB64))
+                {
+                    host = obj;
+                    return true;
+                }
+            }
+        }
+
+        // Fallback: scan first-level objects
+        foreach (var kv in root)
+        {
+            if (kv.Value is JsonObject candidate)
+            {
+                if (TryGetStringProperty(candidate, "Cypher", out cypherB64) && TryGetStringProperty(candidate, "IV", out ivB64))
+                {
+                    host = candidate;
+                    return true;
+                }
+            }
+        }
+
+        cypherB64 = string.Empty;
+        ivB64 = string.Empty;
+        host = root;
+        return false;
+    }
+
+    private static bool TryGetStringProperty(JsonObject obj, string name, out string value)
+    {
+        value = string.Empty;
+        // Exact
+        if (obj.TryGetPropertyValue(name, out var node) && node is JsonValue jv1 && jv1.TryGetValue(out string? s1) && !string.IsNullOrWhiteSpace(s1))
+        {
+            value = s1;
+            return true;
+        }
+        // Case-insensitive
+        var match = obj.FirstOrDefault(kv => string.Equals(kv.Key, name, StringComparison.OrdinalIgnoreCase));
+        if (match.Value is JsonValue jv2 && jv2.TryGetValue(out string? s2) && !string.IsNullOrWhiteSpace(s2))
+        {
+            value = s2;
+            return true;
+        }
+        return false;
     }
 
     private static string BuildKeyFromSerial(string serial)

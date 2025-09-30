@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
+﻿using System.Text.Json.Nodes;
 
 namespace SepidarGateway.Api.Interfaces;
 
 public interface ISepidarService
 {
-    Task<JsonDocument?> RegisterDeviceAsync(string serial, CancellationToken cancellationToken = default);
+    Task<JsonNode?> RegisterDeviceAsync(string serial, CancellationToken cancellationToken = default);
 }
