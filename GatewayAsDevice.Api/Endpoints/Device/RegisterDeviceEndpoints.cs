@@ -78,11 +78,13 @@ public static class RegisterDeviceEndpoints
                 CachedAt = DateTimeOffset.UtcNow
             };
             var expireMinutes = configuration.GetValue<int?>("Gateway:Cache:RegisterDevice:ExpirationMinutes") ?? 10;
-            cache.Set(BuildCacheKey(serial), entry, new CacheOptions
+            var options = new CacheOptions
             {
                 Secure = true,
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expireMinutes)
-            });
+            };
+            cache.Set(BuildCacheKey(serial), entry, options);
+            cache.Set(BuildCurrentCacheKey(), entry, options);
 
             return Results.Json(responseNode);
         }
@@ -109,4 +111,5 @@ public static class RegisterDeviceEndpoints
         => Results.BadRequest(new { message = "برای ثبت دستگاه از متد POST استفاده کنید." });
 
     private static string BuildCacheKey(string serial) => $"device:register:{serial}";
+    private static string BuildCurrentCacheKey() => "device:register:current";
 }

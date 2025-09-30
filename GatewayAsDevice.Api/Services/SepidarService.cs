@@ -104,14 +104,19 @@ public class SepidarService : ISepidarService
             {
                 try
                 {
-                    var key16 = BuildKeyFromSerial(rawSerial);
-                    var xml = DecryptToXmlString(cypherB64, ivB64, key16);
+                    // Try multiple key-derivation strategies to match Sepidar docs differences
+                    var (ok, xml, usedStrategy) = TryDecryptPublicKeyWithStrategies(cypherB64, ivB64, rawSerial);
+                    if (!ok)
+                    {
+                        throw new InvalidOperationException("رمزگشایی کلید عمومی از پاسخ رجیستر ناموفق بود. احتمالاً کلید AES نادرست مشتق شده است.");
+                    }
 
                     // Attempt to parse XML for RSA parameters
                     var (modulus, exponent) = TryParseRsaXml(xml);
 
                     // Attach results next to the found Cypher/IV
                     hostObject["PublicKeyXml"] = xml;
+                    hostObject["PublicKeyDerivation"] = usedStrategy;
                     if (!string.IsNullOrWhiteSpace(modulus) || !string.IsNullOrWhiteSpace(exponent))
                     {
                         hostObject["PublicKey"] = new JsonObject
@@ -213,6 +218,72 @@ public class SepidarService : ISepidarService
         var xml = Encoding.UTF8.GetString(plainBytes).Trim();
         return xml;
     }
+
+    private static (bool Ok, string Xml, string Strategy) TryDecryptPublicKeyWithStrategies(string cypherB64, string ivB64, string serial)
+    {
+        foreach (var (k, name) in GenerateCandidateKeys(serial))
+        {
+            try
+            {
+                var xml = DecryptToXmlString(cypherB64, ivB64, k);
+                if (LooksLikeRsaXml(xml))
+                {
+                    return (true, xml, name);
+                }
+            }
+            catch
+            {
+                // try next
+            }
+        }
+        return (false, string.Empty, string.Empty);
+    }
+
+    private static IEnumerable<(string Key, string Name)> GenerateCandidateKeys(string serial)
+    {
+        serial = (serial ?? string.Empty).Trim();
+        var digits = new string(serial.Where(char.IsDigit).ToArray());
+
+        // 1) serial+serial then cut to 16
+        yield return (CutOrRepeat(serial + serial, 16), "Serial+Serial Left16");
+        // 2) Left 16 chars of serial
+        yield return (CutOrRepeat(serial, 16), "Serial Left16");
+        // 3) Digits-only left 16 or repeat to 16
+        if (!string.IsNullOrEmpty(digits))
+        {
+            yield return (CutOrRepeat(digits, 16), "Digits Left/Repeat16");
+        }
+        // 4) Repeat serial to 16 (exact repeat)
+        yield return (RepeatToLength(serial, 16), "Serial RepeatTo16");
+        // 5) Repeat digits to 16
+        if (!string.IsNullOrEmpty(digits))
+        {
+            yield return (RepeatToLength(digits, 16), "Digits RepeatTo16");
+        }
+        // 6) Uppercase variations
+        var up = serial.ToUpperInvariant();
+        var down = serial.ToLowerInvariant();
+        yield return (CutOrRepeat(up + up, 16), "Upper Serial+Serial Left16");
+        yield return (CutOrRepeat(down + down, 16), "Lower Serial+Serial Left16");
+    }
+
+    private static string CutOrRepeat(string s, int len)
+    {
+        if (string.IsNullOrEmpty(s)) throw new InvalidOperationException("سریال برای استخراج کلید خالی است.");
+        if (s.Length >= len) return s[..len];
+        return RepeatToLength(s, len);
+    }
+
+    private static string RepeatToLength(string s, int len)
+    {
+        if (string.IsNullOrEmpty(s)) throw new InvalidOperationException("رشته ورودی برای تکرار خالی است.");
+        var sb = new StringBuilder(len);
+        while (sb.Length < len) sb.Append(s);
+        return sb.ToString()[..len];
+    }
+
+    private static bool LooksLikeRsaXml(string xml)
+        => !string.IsNullOrWhiteSpace(xml) && xml.Contains("<RSAKeyValue", StringComparison.OrdinalIgnoreCase);
 
     private static (string Modulus, string Exponent) TryParseRsaXml(string xml)
     {
