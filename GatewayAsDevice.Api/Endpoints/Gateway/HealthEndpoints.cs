@@ -12,12 +12,15 @@ public static class HealthEndpoints
         var configuration = endpoints.ServiceProvider.GetRequiredService<IConfiguration>();
         var healthPath = configuration.GetValue<string>("Gateway:Health:Path") ?? "/health";
 
-        endpoints.MapGet(healthPath, () => Results.Ok(new
+        endpoints.MapGet(healthPath, GetHealth)
+        .WithTags("Gateway");
+    }
+
+    // Handler: GET /health
+    private static IResult GetHealth()
+        => Results.Ok(new
         {
             status = "Healthy",
             timestamp = DateTimeOffset.UtcNow
-        }))
-        .WithTags("Gateway");
-    }
+        });
 }
-

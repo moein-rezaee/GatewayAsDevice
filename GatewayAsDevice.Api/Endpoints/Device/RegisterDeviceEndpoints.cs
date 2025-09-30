@@ -17,43 +17,7 @@ public static class RegisterDeviceEndpoints
         var sepidarRegisterPath = configuration.GetValue<string>("Sepidar:RegisterDevice:Endpoint") ?? "/api/Devices/Register";
         var deviceRegisterRouteV1 = CombineRoute("/v1", sepidarRegisterPath);
 
-        endpoints.MapPost(deviceRegisterRouteV1, async (
-            RegisterDeviceGatewayRequest request,
-            ISepidarService sepidarService,
-            CancellationToken cancellationToken) =>
-        {
-            if (string.IsNullOrWhiteSpace(request.Serial))
-            {
-                return Results.BadRequest(new { message = "ارسال سریال دستگاه الزامی است." });
-            }
-
-            try
-            {
-                var responseNode = await sepidarService.RegisterDeviceAsync(request.Serial, cancellationToken).ConfigureAwait(false);
-                if (responseNode is null)
-                {
-                    return Results.NoContent();
-                }
-
-                return Results.Json(responseNode);
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Results.Problem(ex.Message);
-            }
-            catch (HttpRequestException ex)
-            {
-                return Results.Problem(detail: ex.Message, statusCode: StatusCodes.Status502BadGateway, title: "خطا در ارتباط با سپیدار");
-            }
-            catch (TaskCanceledException)
-            {
-                return Results.Problem(detail: "مهلت فراخوانی سرویس سپیدار به پایان رسید.", statusCode: StatusCodes.Status504GatewayTimeout, title: "اتمام مهلت ارتباط");
-            }
-        })
+        endpoints.MapPost(deviceRegisterRouteV1, RegisterDeviceAsync)
         .WithName("SepidarRegisterDevice")
         .WithTags("Device")
         .WithOpenApi(operation =>
@@ -63,7 +27,7 @@ public static class RegisterDeviceEndpoints
             return operation;
         });
 
-        endpoints.MapGet(deviceRegisterRouteV1, () => Results.BadRequest(new { message = "برای ثبت دستگاه از متد POST استفاده کنید." }))
+        endpoints.MapGet(deviceRegisterRouteV1, RequirePostForRegister)
             .ExcludeFromDescription();
     }
 
@@ -83,5 +47,47 @@ public static class RegisterDeviceEndpoints
         var ep = Normalize(endpoint, leading: false);
         return string.IsNullOrEmpty(ep) ? v : $"{v}/{ep}";
     }
-}
 
+    // Handler: POST Register Device
+    private static async Task<IResult> RegisterDeviceAsync(
+        RegisterDeviceGatewayRequest request,
+        ISepidarService sepidarService,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Serial))
+        {
+            return Results.BadRequest(new { message = "ارسال سریال دستگاه الزامی است." });
+        }
+
+        try
+        {
+            var responseNode = await sepidarService.RegisterDeviceAsync(request.Serial, cancellationToken).ConfigureAwait(false);
+            if (responseNode is null)
+            {
+                return Results.NoContent();
+            }
+
+            return Results.Json(responseNode);
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.Problem(ex.Message);
+        }
+        catch (HttpRequestException ex)
+        {
+            return Results.Problem(detail: ex.Message, statusCode: StatusCodes.Status502BadGateway, title: "خطا در ارتباط با سپیدار");
+        }
+        catch (TaskCanceledException)
+        {
+            return Results.Problem(detail: "مهلت فراخوانی سرویس سپیدار به پایان رسید.", statusCode: StatusCodes.Status504GatewayTimeout, title: "اتمام مهلت ارتباط");
+        }
+    }
+
+    // Handler: GET on register route (not allowed)
+    private static IResult RequirePostForRegister()
+        => Results.BadRequest(new { message = "برای ثبت دستگاه از متد POST استفاده کنید." });
+}
