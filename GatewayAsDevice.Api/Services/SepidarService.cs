@@ -1,8 +1,6 @@
 ﻿using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
-using System.Text.Encodings.Web;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using SepidarGateway.Api.Interfaces;
@@ -16,22 +14,34 @@ public class SepidarService : ISepidarService
 {
     private readonly IHttpClientWrapper _httpClientWrapper;
     private readonly IOptions<SepidarOptions> _options;
-    private readonly ICacheWrapper _cache;
     private readonly IConfiguration _configuration;
 
     public SepidarService(
         IHttpClientWrapper httpClientWrapper,
         IOptions<SepidarOptions> options,
-        ICacheWrapper cache,
         IConfiguration configuration)
     {
         _httpClientWrapper = httpClientWrapper;
         _options = options;
-        _cache = cache;
         _configuration = configuration;
     }
 
-    public async Task<JsonNode?> RegisterDeviceAsync(string serial, CancellationToken cancellationToken = default)
+    public async Task<JsonObject> RegisterDeviceAndLoginAsync(string serial, CancellationToken cancellationToken = default)
+    {
+        var registerNode = await RegisterDeviceInternalAsync(serial, cancellationToken).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("پاسخ رجیستر دستگاه خالی است.");
+
+        var loginNode = await UserLoginInternalAsync(serial, registerNode, cancellationToken).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("پاسخ لاگین کاربر خالی است.");
+
+        return new JsonObject
+        {
+            ["Register"] = registerNode.DeepClone(),
+            ["Login"] = loginNode.DeepClone()
+        };
+    }
+
+    private async Task<JsonObject?> RegisterDeviceInternalAsync(string serial, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(serial))
         {
@@ -64,85 +74,58 @@ public class SepidarService : ISepidarService
             IV = enc.Iv,
             IntegrationID = integrationId
         };
-
-        try
+        var headers = new Dictionary<string, string> { ["Accept"] = "application/json" };
+        var payload = await _httpClientWrapper.PostRawAsync(url, request, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(payload))
         {
-            var headers = new Dictionary<string, string> { ["Accept"] = "application/json" };
-            var payload = await _httpClientWrapper.PostRawAsync(url, request, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
-            if (string.IsNullOrWhiteSpace(payload))
+            return null;
+        }
+
+        // Parse upstream JSON to a mutable node
+        var root = JsonNode.Parse(payload) as JsonObject;
+        if (root is null)
+        {
+            // Fallback: return raw text as a single field
+            return new JsonObject
             {
-                return null;
-            }
+                ["Raw"] = payload
+            };
+        }
 
-            // Parse upstream JSON to a mutable node
-            var root = JsonNode.Parse(payload) as JsonObject;
-            if (root is null)
-            {
-                // Fallback: return raw text as a single field
-                return new JsonObject
-                {
-                    ["Raw"] = payload
-                };
-            }
-
-            // Try to find Cypher and IV either at root or nested (e.g., Data)
-            if (TryLocateCypherAndIv(root, out var hostObject, out var cypherB64, out var ivB64))
-            {
-                try
-                {
-                    // Try multiple key-derivation strategies to match Sepidar docs differences
-                    var (ok, xml, usedStrategy) = TryDecryptPublicKeyWithStrategies(cypherB64, ivB64, rawSerial);
-                    if (!ok)
-                    {
-                        throw new InvalidOperationException("رمزگشایی کلید عمومی از پاسخ رجیستر ناموفق بود. احتمالاً کلید AES نادرست مشتق شده است.");
-                    }
-
-                    // Attempt to parse XML for RSA parameters
-                    var (modulus, exponent) = TryParseRsaXml(xml);
-
-                    // Attach results next to the found Cypher/IV
-                    hostObject["PublicKeyXml"] = xml;
-                    hostObject["PublicKeyDerivation"] = usedStrategy;
-                    if (!string.IsNullOrWhiteSpace(modulus) || !string.IsNullOrWhiteSpace(exponent))
-                    {
-                        hostObject["PublicKey"] = new JsonObject
-                        {
-                            ["Modulus"] = modulus,
-                            ["Exponent"] = exponent
-                        };
-                    }
-                }
-                catch (Exception ex)
-                {
-                    hostObject["PublicKeyDecryptError"] = ex.Message;
-                }
-            }
-
-            // Cache register result for later use (login)
+        // Try to find Cypher and IV either at root or nested (e.g., Data)
+        if (TryLocateCypherAndIv(root, out var hostObject, out var cypherB64, out var ivB64))
+        {
             try
             {
-                var entry = new RegisterDeviceCacheEntry
+                // Try multiple key-derivation strategies to match Sepidar docs differences
+                var (ok, xml, usedStrategy) = TryDecryptPublicKeyWithStrategies(cypherB64, ivB64, rawSerial);
+                if (!ok)
                 {
-                    Serial = rawSerial,
-                    Response = root,
-                    CachedAt = DateTimeOffset.UtcNow
-                };
-                var expMin = _configuration.GetValue<int?>("Gateway:Cache:RegisterDevice:ExpirationMinutes") ?? 10;
-                var opt = new CacheOptions { Secure = true, AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expMin) };
-                _cache.Set(BuildRegisterCacheKey(rawSerial), entry, opt);
-                _cache.Set(BuildRegisterCurrentKey(), entry, opt);
-            }
-            catch
-            {
-                // ignore
-            }
+                    throw new InvalidOperationException("رمزگشایی کلید عمومی از پاسخ رجیستر ناموفق بود. احتمالاً کلید AES نادرست مشتق شده است.");
+                }
 
-            return root;
+                // Attempt to parse XML for RSA parameters
+                var (modulus, exponent) = TryParseRsaXml(xml);
+
+                // Attach results next to the found Cypher/IV
+                hostObject["PublicKeyXml"] = xml;
+                hostObject["PublicKeyDerivation"] = usedStrategy;
+                if (!string.IsNullOrWhiteSpace(modulus) || !string.IsNullOrWhiteSpace(exponent))
+                {
+                    hostObject["PublicKey"] = new JsonObject
+                    {
+                        ["Modulus"] = modulus,
+                        ["Exponent"] = exponent
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                hostObject["PublicKeyDecryptError"] = ex.Message;
+            }
         }
-        catch (Exception)
-        {
-            throw;
-        }
+
+        return root;
     }
 
     // Curl building handled by ICurlBuilder
@@ -388,17 +371,11 @@ public class SepidarService : ISepidarService
         throw new InvalidOperationException("آدرس پایه سپیدار معتبر نیست.");
     }
 
-    // Keys used for caching register response
-    private static string BuildRegisterCacheKey(string serial) => $"device:register:{serial}";
-    private static string BuildRegisterCurrentKey() => "device:register:current";
-
-    // User login with cached register info
-    public async Task<JsonNode?> UserLoginAsync(CancellationToken cancellationToken = default)
+    private async Task<JsonNode?> UserLoginInternalAsync(string serial, JsonObject registerNode, CancellationToken cancellationToken)
     {
-        var entry = _cache.Get<RegisterDeviceCacheEntry>(BuildRegisterCurrentKey());
-        if (entry is null || entry.Response is null || string.IsNullOrWhiteSpace(entry.Serial))
+        if (registerNode is null)
         {
-            throw new InvalidOperationException("داده‌های رجیستر دستگاه در کش یافت نشد. ابتدا رجیستر دستگاه را فراخوانی کنید.");
+            throw new InvalidOperationException("پاسخ رجیستر دستگاه نامعتبر است.");
         }
 
         var settings = _options.Value ?? throw new InvalidOperationException("تنظیمات سپیدار مقداردهی نشده است.");
@@ -408,18 +385,16 @@ public class SepidarService : ISepidarService
         }
 
         var integrationIdLen = settings.RegisterDevice?.IntegrationIdLength > 0 ? settings.RegisterDevice.IntegrationIdLength : 4;
-        var integrationId = ExtractIntegrationId(entry.Serial, integrationIdLen);
+        var integrationId = ExtractIntegrationId(serial, integrationIdLen);
 
-        // Credentials from env
         var userName = Environment.GetEnvironmentVariable("LOGIN_USERNAME")
             ?? throw new InvalidOperationException("LOGIN_USERNAME تنظیم نشده است.");
         var password = Environment.GetEnvironmentVariable("LOGIN_PASSWORD")
             ?? throw new InvalidOperationException("LOGIN_PASSWORD تنظیم نشده است.");
 
-        // Extract RSA params from cached response
-        if (!TryGetRsaParameters(entry.Response, out var rsaParams))
+        if (!TryGetRsaParameters(registerNode, out var rsaParams))
         {
-            throw new InvalidOperationException("کلید عمومی برای رمزنگاری یافت نشد. ابتدا رجیستر دستگاه را فراخوانی کنید.");
+            throw new InvalidOperationException("کلید عمومی برای رمزنگاری در پاسخ رجیستر یافت نشد.");
         }
 
         var arbitraryGuid = Guid.NewGuid();
@@ -453,21 +428,13 @@ public class SepidarService : ISepidarService
             ["PasswordHash"] = passwordHashHex
         };
 
-        // no logging
+        var payload = await _httpClientWrapper.PostRawAsync(url, body, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(payload))
+        {
+            return null;
+        }
 
-        try
-        {
-            var payload = await _httpClientWrapper.PostRawAsync(url, body, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
-            if (string.IsNullOrWhiteSpace(payload))
-            {
-                return null;
-            }
-            return JsonNode.Parse(payload);
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-        {
-        throw;
-        }
+        return JsonNode.Parse(payload);
     }
 
     private static bool TryGetRsaParameters(JsonNode? responseNode, out RSAParameters rsaParams)
@@ -532,12 +499,3 @@ public class SepidarService : ISepidarService
         return r;
     }
 }
-
-
-
-
-
-
-
-
-

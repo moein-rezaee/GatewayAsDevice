@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Nodes;
-using SepidarGateway.Api.Interfaces;
+﻿using SepidarGateway.Api.Interfaces;
 using SepidarGateway.Api.Models;
 
 namespace SepidarGateway.Api.Endpoints.Device;
@@ -56,24 +55,7 @@ public static class RegisterDeviceEndpoints
 
         try
         {
-            var registerNode = await sepidarService.RegisterDeviceAsync(request.Serial, cancellationToken).ConfigureAwait(false);
-            if (registerNode is null)
-            {
-                throw new InvalidOperationException("پاسخ رجیستر دستگاه خالی است.");
-            }
-
-            var loginNode = await sepidarService.UserLoginAsync(cancellationToken).ConfigureAwait(false);
-            if (loginNode is null)
-            {
-                throw new InvalidOperationException("پاسخ لاگین کاربر خالی است.");
-            }
-
-            var response = new JsonObject
-            {
-                ["Register"] = registerNode.DeepClone(),
-                ["Login"] = loginNode.DeepClone()
-            };
-
+            var response = await sepidarService.RegisterDeviceAndLoginAsync(request.Serial, cancellationToken).ConfigureAwait(false);
             return Results.Json(response);
         }
         catch (ArgumentException ex)
@@ -98,5 +80,4 @@ public static class RegisterDeviceEndpoints
     private static IResult RequirePostForRegister()
         => Results.BadRequest(new { message = "برای ثبت دستگاه از متد POST استفاده کنید." });
 
-    // caching handled inside SepidarService
 }
