@@ -71,7 +71,6 @@ app.UseSwaggerUI(c =>
 // Map endpoints from dedicated classes
 app.MapHealthEndpoints();
 app.MapRegisterDeviceEndpoints();
-app.MapUserLoginEndpoints();
 
 app.MapFallback(() => Results.Problem("اندپوینت مورد نظر یافت نشد."));
 

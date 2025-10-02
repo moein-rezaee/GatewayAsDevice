@@ -1,4 +1,5 @@
-﻿using SepidarGateway.Api.Interfaces;
+﻿using System.Text.Json.Nodes;
+using SepidarGateway.Api.Interfaces;
 using SepidarGateway.Api.Models;
 
 namespace SepidarGateway.Api.Endpoints.Device;
@@ -16,8 +17,8 @@ public static class RegisterDeviceEndpoints
         .WithTags("Device")
         .WithOpenApi(operation =>
         {
-            operation.Summary = "ثبت دستگاه در سپیدار";
-            operation.Description = "این اندپوینت فقط سریال دستگاه را دریافت می‌کند و مقادیر موردنیاز رجیستر دستگاه سپیدار را در پس‌زمینه محاسبه و پروکسی می‌کند.";
+            operation.Summary = "ثبت دستگاه و ورود کاربر در سپیدار";
+            operation.Description = "سریال دستگاه را دریافت می‌کند، رجیستر دستگاه را انجام می‌دهد و در ادامه فرآیند لاگین کاربر را نیز تکمیل می‌کند.";
             return operation;
         });
 
@@ -55,13 +56,25 @@ public static class RegisterDeviceEndpoints
 
         try
         {
-            var responseNode = await sepidarService.RegisterDeviceAsync(request.Serial, cancellationToken).ConfigureAwait(false);
-            if (responseNode is null)
+            var registerNode = await sepidarService.RegisterDeviceAsync(request.Serial, cancellationToken).ConfigureAwait(false);
+            if (registerNode is null)
             {
-                return Results.NoContent();
+                throw new InvalidOperationException("پاسخ رجیستر دستگاه خالی است.");
             }
 
-            return Results.Json(responseNode);
+            var loginNode = await sepidarService.UserLoginAsync(cancellationToken).ConfigureAwait(false);
+            if (loginNode is null)
+            {
+                throw new InvalidOperationException("پاسخ لاگین کاربر خالی است.");
+            }
+
+            var response = new JsonObject
+            {
+                ["Register"] = registerNode.DeepClone(),
+                ["Login"] = loginNode.DeepClone()
+            };
+
+            return Results.Json(response);
         }
         catch (ArgumentException ex)
         {
