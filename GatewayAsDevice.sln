@@ -5,6 +5,10 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatewayAsDevice.Api", "GatewayAsDevice.Api\GatewayAsDevice.Api.csproj", "{48D660A6-2D91-468F-90F9-07ED82A534B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SepidarExtension", "Extensions\SepidarExtension\SepidarExtension.csproj", "{1F7B6BE7-3D39-4B7B-9B60-8AF5B3B7E2C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpClientRestExtension", "Extensions\HttpClientRestExtension\HttpClientRestExtension.csproj", "{B69B9C0A-7D62-4D9A-8D71-8E0B6E8E8A21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{48D660A6-2D91-468F-90F9-07ED82A534B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48D660A6-2D91-468F-90F9-07ED82A534B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48D660A6-2D91-468F-90F9-07ED82A534B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F7B6BE7-3D39-4B7B-9B60-8AF5B3B7E2C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F7B6BE7-3D39-4B7B-9B60-8AF5B3B7E2C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F7B6BE7-3D39-4B7B-9B60-8AF5B3B7E2C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F7B6BE7-3D39-4B7B-9B60-8AF5B3B7E2C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B69B9C0A-7D62-4D9A-8D71-8E0B6E8E8A21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B69B9C0A-7D62-4D9A-8D71-8E0B6E8E8A21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B69B9C0A-7D62-4D9A-8D71-8E0B6E8E8A21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B69B9C0A-7D62-4D9A-8D71-8E0B6E8E8A21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

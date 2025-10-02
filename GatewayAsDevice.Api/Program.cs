@@ -46,16 +46,9 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 });
-builder.Services.AddHttpClient<IHttpClientWrapper, HttpClientWrapper>();
+builder.Services.AddHttpClient();
 builder.Services.Configure<SepidarOptions>(builder.Configuration.GetSection("Sepidar"));
-builder.Services.AddScoped<SepidarGateway.Api.Interfaces.ISepidarService, SepidarGateway.Api.Services.Sepidar.SepidarService>();
-builder.Services.AddSingleton<SepidarGateway.Api.Interfaces.Sepidar.ICryptoService, SepidarGateway.Api.Services.Sepidar.CryptoService>();
-builder.Services.AddSingleton<SepidarGateway.Api.Interfaces.Sepidar.IConfigService, SepidarGateway.Api.Services.Sepidar.ConfigService>();
-builder.Services.AddSingleton<SepidarGateway.Api.Interfaces.Sepidar.ICredentialsProvider, SepidarGateway.Api.Services.Sepidar.CredentialsProvider>();
-builder.Services.AddScoped<SepidarGateway.Api.Interfaces.Sepidar.IRegisterService, SepidarGateway.Api.Services.Sepidar.RegisterService>();
-builder.Services.AddScoped<SepidarGateway.Api.Interfaces.Sepidar.ILoginService, SepidarGateway.Api.Services.Sepidar.LoginService>();
-builder.Services.AddMemoryCache();
-builder.Services.AddSingleton<ICacheWrapper, MemoryCacheWrapper>();
+builder.Services.AddScoped<SepidarGateway.Api.Interfaces.ISepidarService, SepidarGateway.Api.Services.SepidarService>();
 builder.Services.AddSingleton<ICurlBuilder, CurlBuilder>();
 
 var app = builder.Build();
