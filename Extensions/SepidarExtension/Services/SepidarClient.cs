@@ -126,7 +126,18 @@ public class SepidarClient : ISepidarClient
 
         var payload = await _rest.PostAsync(url, body, headers, null, ct).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(payload)) return null;
-        return JsonNode.Parse(payload) as JsonObject ?? new JsonObject { ["Raw"] = payload };
+        var node = JsonNode.Parse(payload) as JsonObject ?? new JsonObject { ["Raw"] = payload };
+
+        // augment response with requested fields
+        node["IntegrationID"] = integrationId;
+        node["EncArbitraryCode"] = encArbitraryCode;
+        var token = TryExtractToken(node);
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            node["Authorization"] = $"Bearer {token}";
+        }
+
+        return node;
     }
 
     private static void ValidateOptions(SepidarClientOptions o, bool requireCredentials)
@@ -181,6 +192,15 @@ public class SepidarClient : ISepidarClient
         var sb = new StringBuilder(bytes.Length * 2);
         foreach (var b in bytes) sb.Append(b.ToString("x2"));
         return sb.ToString();
+    }
+    private static string? TryExtractToken(JsonObject node)
+    {
+        foreach (var key in new[] { "Authorization", "Token", "token", "AccessToken", "access_token" })
+        {
+            if (node[key] is JsonValue v && v.TryGetValue(out string? s) && !string.IsNullOrWhiteSpace(s))
+                return s;
+        }
+        return null;
     }
     private static bool TryLocateCypherAndIv(JsonObject root, out JsonObject host, out string cypherB64, out string ivB64)
     {
