@@ -36,11 +36,16 @@ public class SepidarHeadersHandler : DelegatingHandler
         var rawPath = request.RequestUri?.AbsolutePath ?? string.Empty;
         var normalizedPath = NormalizePath(rawPath);
 
-        var requiresSession = !_noSessionPaths.Contains(normalizedPath);
-        _logger.LogInformation("SepidarHeadersHandler executing for {Method} {Path}. Requires session: {RequiresSession}", request.Method, normalizedPath, requiresSession);
+        if (_noSessionPaths.Contains(normalizedPath))
+        {
+            _logger.LogDebug("Skipping Sepidar session injection for {Method} {Path}.", request.Method, normalizedPath);
+            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        _logger.LogInformation("SepidarHeadersHandler executing for {Method} {Path}.", request.Method, normalizedPath);
 
         SepidarSession? session = null;
-        if (requiresSession && (!_cache.TryGet<SepidarSession>("Sepidar:Session", out session) || session is null))
+        if (!_cache.TryGet<SepidarSession>("Sepidar:Session", out session) || session is null)
         {
             _logger.LogWarning("Sepidar session not found for downstream request {Method} {Path}.", request.Method, normalizedPath);
             var content = new StringContent(
@@ -51,38 +56,35 @@ public class SepidarHeadersHandler : DelegatingHandler
             return resp;
         }
 
-        if (requiresSession)
+        // Generate new arbitrary code per request and encrypt with RSA
+        var arbitrary = Guid.NewGuid();
+        if (!TryBuildRsaParams(session!, out var rsaParams))
         {
-            // Generate new arbitrary code per request and encrypt with RSA
-            var arbitrary = Guid.NewGuid();
-            if (!TryBuildRsaParams(session!, out var rsaParams))
-            {
-                _logger.LogWarning("Failed to build RSA parameters from cached session for downstream request {Method} {Path}.", request.Method, normalizedPath);
-                var content = new StringContent(
-                    JsonSerializer.Serialize(new { message = "کلید عمومی نامعتبر است. رجیستر را بررسی کنید." }),
-                    Encoding.UTF8,
-                    "application/json");
-                return new HttpResponseMessage(HttpStatusCode.BadGateway) { Content = content };
-            }
-
-            var encArbitrary = _pk.EncryptGuidArbitraryCode(arbitrary, rsaParams);
-
-            // Inject headers downstream (only when required)
-            request.Headers.Remove("GenerationVersion");
-            request.Headers.Add("GenerationVersion", session!.GenerationVersion.ToString());
-            request.Headers.Remove("IntegrationID");
-            request.Headers.Add("IntegrationID", session!.IntegrationID.ToString());
-            request.Headers.Remove("ArbitraryCode");
-            request.Headers.Add("ArbitraryCode", arbitrary.ToString());
-            request.Headers.Remove("EncArbitraryCode");
-            request.Headers.Add("EncArbitraryCode", encArbitrary);
-            if (!string.IsNullOrWhiteSpace(session!.Authorization))
-            {
-                request.Headers.Remove("Authorization");
-                request.Headers.Add("Authorization", session!.Authorization!);
-            }
-            _logger.LogInformation("Injected Sepidar headers for downstream request {Method} {Path}.", request.Method, normalizedPath);
+            _logger.LogWarning("Failed to build RSA parameters from cached session for downstream request {Method} {Path}.", request.Method, normalizedPath);
+            var content = new StringContent(
+                JsonSerializer.Serialize(new { message = "کلید عمومی نامعتبر است. رجیستر را بررسی کنید." }),
+                Encoding.UTF8,
+                "application/json");
+            return new HttpResponseMessage(HttpStatusCode.BadGateway) { Content = content };
         }
+
+        var encArbitrary = _pk.EncryptGuidArbitraryCode(arbitrary, rsaParams);
+
+        // Inject headers downstream
+        request.Headers.Remove("GenerationVersion");
+        request.Headers.Add("GenerationVersion", session!.GenerationVersion.ToString());
+        request.Headers.Remove("IntegrationID");
+        request.Headers.Add("IntegrationID", session!.IntegrationID.ToString());
+        request.Headers.Remove("ArbitraryCode");
+        request.Headers.Add("ArbitraryCode", arbitrary.ToString());
+        request.Headers.Remove("EncArbitraryCode");
+        request.Headers.Add("EncArbitraryCode", encArbitrary);
+        if (!string.IsNullOrWhiteSpace(session!.Authorization))
+        {
+            request.Headers.Remove("Authorization");
+            request.Headers.Add("Authorization", session!.Authorization!);
+        }
+        _logger.LogInformation("Injected Sepidar headers for downstream request {Method} {Path}.", request.Method, normalizedPath);
 
         await LogDownstreamCurlAsync(request, cancellationToken).ConfigureAwait(false);
 
