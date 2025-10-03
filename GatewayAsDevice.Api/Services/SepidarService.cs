@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Configuration;
 using Sepidar.Extension.Services;
@@ -33,14 +34,25 @@ public class SepidarService : ISepidarService
         var response = new JsonObject
         {
             ["Register"] = register.DeepClone(),
-            ["Login"] = login.DeepClone(),
             ["GenerationVersion"] = opts.GenerationVersion,
         };
+
+        var loginClone = login.DeepClone();
+        if (loginClone is JsonObject loginObj)
+        {
+            loginObj.Remove("IntegrationID");
+            loginObj.Remove("Authorization");
+            response["Login"] = loginObj;
+        }
+        else
+        {
+            response["Login"] = loginClone;
+        }
 
         // Try lift IntegrationID & Authorization to root for convenience
         try
         {
-            var integrationId = register["IntegrationID"]?.GetValue<int?>() ?? login["IntegrationID"]?.GetValue<int?>();
+            var integrationId = TryGetInt(register["IntegrationID"]) ?? TryGetInt(login["IntegrationID"]);
             if (integrationId.HasValue)
             {
                 response["IntegrationID"] = integrationId.Value;
@@ -49,7 +61,7 @@ public class SepidarService : ISepidarService
         catch { }
         try
         {
-            var authorization = login["Authorization"]?.GetValue<string>();
+            var authorization = TryGetString(login["Authorization"]);
             if (!string.IsNullOrWhiteSpace(authorization))
             {
                 response["Authorization"] = authorization;
@@ -91,16 +103,15 @@ public class SepidarService : ISepidarService
             string? mod = null, exp = null, xml = null;
             if (register["PublicKey"] is JsonObject pk)
             {
-                mod = pk["Modulus"]?.GetValue<string>();
-                exp = pk["Exponent"]?.GetValue<string>();
+                mod = TryGetString(pk["Modulus"]);
+                exp = TryGetString(pk["Exponent"]);
             }
-            xml = register["PublicKeyXml"]?.GetValue<string>();
+            xml = TryGetString(register["PublicKeyXml"]);
 
             // Extract token
-            var auth = login["Authorization"]?.GetValue<string>();
+            var auth = TryGetString(login["Authorization"]);
 
-            var integrationId = register["IntegrationID"]?.GetValue<int?>() ?? 0;
-            if (integrationId == 0 && login["IntegrationID"]?.GetValue<int?>() is int iid) integrationId = iid;
+            var integrationId = TryGetInt(register["IntegrationID"]) ?? TryGetInt(login["IntegrationID"]) ?? 0;
 
             var session = new SepidarGateway.Api.Models.SepidarSession
             {
@@ -118,5 +129,45 @@ public class SepidarService : ISepidarService
         {
             // ignore cache failures
         }
+    }
+
+    private static int? TryGetInt(JsonNode? node)
+    {
+        if (node is null) return null;
+        if (node is JsonValue value)
+        {
+            if (value.TryGetValue(out int direct)) return direct;
+            if (value.TryGetValue(out long asLong))
+            {
+                if (asLong > int.MaxValue || asLong < int.MinValue) return null;
+                return (int)asLong;
+            }
+            if (value.TryGetValue(out string? asString) && int.TryParse(asString, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed))
+            {
+                return parsed;
+            }
+        }
+        return null;
+    }
+
+    private static string? TryGetString(JsonNode? node)
+    {
+        if (node is null) return null;
+        if (node is JsonValue value)
+        {
+            if (value.TryGetValue(out string? asString) && !string.IsNullOrWhiteSpace(asString))
+            {
+                return asString;
+            }
+            if (value.TryGetValue(out int asInt))
+            {
+                return asInt.ToString(CultureInfo.InvariantCulture);
+            }
+            if (value.TryGetValue(out long asLong))
+            {
+                return asLong.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+        return null;
     }
 }
