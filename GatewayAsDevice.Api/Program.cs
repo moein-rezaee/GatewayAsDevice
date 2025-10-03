@@ -61,7 +61,9 @@ builder.Services.AddSingleton<ICurlBuilder, CurlBuilder>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddTransient<SepidarHeadersHandler>();
-builder.Services.AddOcelot();
+builder.Services
+    .AddOcelot()
+    .AddDelegatingHandler<SepidarHeadersHandler>();
 
 var app = builder.Build();
 
