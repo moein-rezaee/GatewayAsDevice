@@ -14,7 +14,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -31,7 +31,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -48,7 +48,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -65,7 +65,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -82,7 +82,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -99,7 +99,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -116,7 +116,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -133,7 +133,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -150,7 +150,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -167,7 +167,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -184,7 +184,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -201,7 +201,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -218,7 +218,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -235,7 +235,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -252,7 +252,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -269,7 +269,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -286,7 +286,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -303,7 +303,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -320,7 +320,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -337,7 +337,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -354,7 +354,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -371,7 +371,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -388,7 +388,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -405,7 +405,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -422,7 +422,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -439,7 +439,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -456,7 +456,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -473,7 +473,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -490,7 +490,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -507,7 +507,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -524,7 +524,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -541,7 +541,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -558,7 +558,7 @@
         }
       ],
       "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, SepidarGateway.Api"
+        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     }
   ],
