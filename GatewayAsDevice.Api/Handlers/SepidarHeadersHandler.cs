@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Sepidar.Extension.Services;
@@ -42,7 +43,10 @@ public class SepidarHeadersHandler : DelegatingHandler
         if (requiresSession && (!_cache.TryGet<SepidarSession>("Sepidar:Session", out session) || session is null))
         {
             _logger.LogWarning("Sepidar session not found for downstream request {Method} {Path}.", request.Method, normalizedPath);
-            var content = new StringContent(JsonSerializer.Serialize(new { message = "ابتدا دستگاه را رجیستر و لاگین کنید." }));
+            var content = new StringContent(
+                JsonSerializer.Serialize(new { message = "ابتدا دستگاه را رجیستر و لاگین کنید." }),
+                Encoding.UTF8,
+                "application/json");
             var resp = new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = content };
             return resp;
         }
@@ -54,7 +58,10 @@ public class SepidarHeadersHandler : DelegatingHandler
             if (!TryBuildRsaParams(session!, out var rsaParams))
             {
                 _logger.LogWarning("Failed to build RSA parameters from cached session for downstream request {Method} {Path}.", request.Method, normalizedPath);
-                var content = new StringContent(JsonSerializer.Serialize(new { message = "کلید عمومی نامعتبر است. رجیستر را بررسی کنید." }));
+                var content = new StringContent(
+                    JsonSerializer.Serialize(new { message = "کلید عمومی نامعتبر است. رجیستر را بررسی کنید." }),
+                    Encoding.UTF8,
+                    "application/json");
                 return new HttpResponseMessage(HttpStatusCode.BadGateway) { Content = content };
             }
 
