@@ -10,8 +10,6 @@ using SepidarGateway.Api.Endpoints.Gateway;
 using SepidarGateway.Api.Endpoints.Device;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
-using SepidarGateway.Api.Interfaces;
-using SepidarGateway.Api.Services;
 using SepidarGateway.Api.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,7 +59,9 @@ builder.Services.AddSingleton<ICurlBuilder, CurlBuilder>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddTransient<SepidarHeadersHandler>();
-builder.Services.AddOcelot();
+builder.Services
+    .AddOcelot()
+    .AddDelegatingHandler<SepidarHeadersHandler>(true);
 
 var app = builder.Build();
 
