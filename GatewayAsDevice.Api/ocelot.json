@@ -1,5 +1,468 @@
-﻿{
-  "Routes": [],
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/v1/api/General/GenerationVersion",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/General/GenerationVersion",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/IsAuthorized",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/IsAuthorized",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/AdministrativeDivisions",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/AdministrativeDivisions",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Banks/",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/banks/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/BankAccounts",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/BankAccounts",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Currencies",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Currencies",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Units",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Units",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/SaleTypes",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/SaleTypes",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/PriceNoteItems",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/PriceNoteItems",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Properties",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/properties",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Stocks",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Stocks",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Items",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Items",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Items/{ItemID}/Image/",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Items/{itemID}/Image/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Items/Inventories/",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Items/Inventories/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/CustomerGroupings",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/CustomerGroupings",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Customers",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Customers",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Customers/{CustomerID}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Customers/{CustomerID}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Customers",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Customers",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Customers/{CustomerID}",
+      "UpstreamHttpMethod": [
+        "Put"
+      ],
+      "DownstreamPathTemplate": "/api/Customers/{CustomerID}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Quotations",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Quotations",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Quotations/{Id}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/Quotations/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Quotations/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Quotations/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Quotations/Batch/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Quotations/Batch/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Quotations/{QuotationID}/Close/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Quotations/{quotationID}/Close/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Quotations/{QuotationID}/UnClose/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Quotations/{quotationID}/UnClose/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Quotations/Close/Batch",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Quotations/Close/Batch",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Quotations/UnClose/Batch",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Quotations/UnClose/Batch",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Invoices/",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/invoices/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Invoices/{Id}",
+      "UpstreamHttpMethod": [
+        "Get"
+      ],
+      "DownstreamPathTemplate": "/api/invoices/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Invoices/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/invoices/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Invoices/Batch/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Invoices/Batch/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Invoices/BasedOnQuotation/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Invoices/BasedOnQuotation/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/v1/api/Receipts/BasedOnInvoice/",
+      "UpstreamHttpMethod": [
+        "Post"
+      ],
+      "DownstreamPathTemplate": "/api/Receipts/BasedOnInvoice/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "178.131.66.32",
+          "Port": 7373
+        }
+      ]
+    }
+  ],
   "GlobalConfiguration": {
     "BaseUrl": "http://localhost:5090",
     "RequestIdKey": "X-Request-Id"

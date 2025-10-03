@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Text;
 using SepidarGateway.Api.Interfaces;
 
@@ -17,6 +17,7 @@ public class CurlBuilder : ICurlBuilder
     public string Build(string url, IDictionary<string, string>? headers = null, string? bodyJson = null, HttpMethod? method = null)
     {
         method ??= HttpMethod.Post;
+        var methodName = method.Method.ToUpperInvariant();
         var ps = _nextPowerShell;
         _nextPowerShell = false; // reset
 
@@ -24,7 +25,12 @@ public class CurlBuilder : ICurlBuilder
         {
             static string Q(string s) => "\"" + s.Replace("`", "``").Replace("\"", "`\"") + "\"";
             var sb = new StringBuilder();
-            sb.Append("curl --location ").Append(Q(url));
+            sb.Append("curl --location");
+            if (!string.IsNullOrWhiteSpace(methodName))
+            {
+                sb.Append(' ').Append("--request ").Append(methodName);
+            }
+            sb.Append(' ').Append(Q(url));
             if (headers is not null)
             {
                 foreach (var (k, v) in headers)
@@ -42,7 +48,12 @@ public class CurlBuilder : ICurlBuilder
         {
             static string Q(string s) => "'" + s.Replace("'", "'\"'\"'") + "'";
             var sb = new StringBuilder();
-            sb.Append("curl --location ").Append(Q(url));
+            sb.Append("curl --location");
+            if (!string.IsNullOrWhiteSpace(methodName))
+            {
+                sb.Append(' ').Append("--request ").Append(methodName);
+            }
+            sb.Append(' ').Append(Q(url));
             if (headers is not null)
             {
                 foreach (var (k, v) in headers)
