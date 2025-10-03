@@ -9,7 +9,7 @@ public static class RegisterDeviceEndpoints
     {
         var configuration = endpoints.ServiceProvider.GetRequiredService<IConfiguration>();
         var sepidarRegisterPath = configuration.GetValue<string>("Sepidar:RegisterDevice:Endpoint") ?? "/api/Devices/Register";
-        var deviceRegisterRouteV1 = CombineRoute("/v1", sepidarRegisterPath);
+        var deviceRegisterRouteV1 = CombineRoute("/gateway/v1", sepidarRegisterPath);
 
         endpoints.MapPost(deviceRegisterRouteV1, RegisterDeviceAsync)
         .WithName("SepidarRegisterDevice")

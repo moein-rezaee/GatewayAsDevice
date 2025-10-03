@@ -130,7 +130,6 @@ public class SepidarClient : ISepidarClient
 
         // augment response with requested fields
         node["IntegrationID"] = integrationId;
-        node["EncArbitraryCode"] = encArbitraryCode;
         var token = TryExtractToken(node);
         if (!string.IsNullOrWhiteSpace(token))
         {

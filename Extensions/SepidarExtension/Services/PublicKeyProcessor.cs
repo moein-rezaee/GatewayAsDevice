@@ -83,6 +83,26 @@ public class PublicKeyProcessor : IPublicKeyProcessor
         return false;
     }
 
+    public string EncryptGuidArbitraryCode(Guid guid, RSAParameters rsaParams)
+    {
+        var guidBytes = GuidToRfc4122Bytes(guid);
+        using var rsa = RSA.Create();
+        rsa.ImportParameters(rsaParams);
+        var enc = rsa.Encrypt(guidBytes, RSAEncryptionPadding.Pkcs1);
+        return Convert.ToBase64String(enc);
+    }
+
+    private static byte[] GuidToRfc4122Bytes(Guid guid)
+    {
+        var b = guid.ToByteArray();
+        var r = new byte[16];
+        r[0] = b[3]; r[1] = b[2]; r[2] = b[1]; r[3] = b[0];
+        r[4] = b[5]; r[5] = b[4];
+        r[6] = b[7]; r[7] = b[6];
+        Array.Copy(b, 8, r, 8, 8);
+        return r;
+    }
+
     private static string DecryptToXml(string cypherBase64, string ivBase64, string key16)
     {
         var cipherBytes = Convert.FromBase64String(cypherBase64);
@@ -99,4 +119,3 @@ public class PublicKeyProcessor : IPublicKeyProcessor
     private static bool LooksLikeRsaXml(string xml)
         => !string.IsNullOrWhiteSpace(xml) && xml.Contains("<RSAKeyValue", StringComparison.OrdinalIgnoreCase);
 }
-
