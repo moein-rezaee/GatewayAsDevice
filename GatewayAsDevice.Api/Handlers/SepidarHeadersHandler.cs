@@ -19,7 +19,8 @@ public class SepidarHeadersHandler : DelegatingHandler
     private readonly ICurlBuilder _curlBuilder;
     private static readonly HashSet<string> _noSessionPaths = new(StringComparer.OrdinalIgnoreCase)
     {
-        "/v1/api/General/GenerationVersion"
+        "/v1/api/General/GenerationVersion",
+        "/api/General/GenerationVersion"
     };
 
     public SepidarHeadersHandler(ICacheService cache, ILogger<SepidarHeadersHandler> logger, ICurlBuilder curlBuilder)
