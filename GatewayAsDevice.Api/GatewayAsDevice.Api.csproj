@@ -10,12 +10,20 @@
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Ocelot" Version="23.3.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Extensions\SepidarExtension\SepidarExtension.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="..\\.env">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>.env</Link>
+    </None>
+    <None Update="ocelot.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 

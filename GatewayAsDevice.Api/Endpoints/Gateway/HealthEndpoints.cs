@@ -5,7 +5,7 @@ public static class HealthEndpoints
     public static void MapHealthEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var configuration = endpoints.ServiceProvider.GetRequiredService<IConfiguration>();
-        var healthPath = configuration.GetValue<string>("Gateway:Health:Path") ?? "/health";
+        var healthPath = configuration.GetValue<string>("Gateway:Health:Path") ?? "/gateway/v1/api/Health";
 
         endpoints.MapGet(healthPath, GetHealth)
         .WithTags("Gateway");

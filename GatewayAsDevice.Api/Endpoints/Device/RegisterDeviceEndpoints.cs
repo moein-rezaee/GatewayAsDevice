@@ -9,15 +9,15 @@ public static class RegisterDeviceEndpoints
     {
         var configuration = endpoints.ServiceProvider.GetRequiredService<IConfiguration>();
         var sepidarRegisterPath = configuration.GetValue<string>("Sepidar:RegisterDevice:Endpoint") ?? "/api/Devices/Register";
-        var deviceRegisterRouteV1 = CombineRoute("/v1", sepidarRegisterPath);
+        var deviceRegisterRouteV1 = CombineRoute("/gateway/v1", sepidarRegisterPath);
 
         endpoints.MapPost(deviceRegisterRouteV1, RegisterDeviceAsync)
         .WithName("SepidarRegisterDevice")
         .WithTags("Device")
         .WithOpenApi(operation =>
         {
-            operation.Summary = "ثبت دستگاه در سپیدار";
-            operation.Description = "این اندپوینت فقط سریال دستگاه را دریافت می‌کند و مقادیر موردنیاز رجیستر دستگاه سپیدار را در پس‌زمینه محاسبه و پروکسی می‌کند.";
+            operation.Summary = "ثبت دستگاه و ورود کاربر در سپیدار";
+            operation.Description = "سریال دستگاه را دریافت می‌کند، رجیستر دستگاه را انجام می‌دهد و در ادامه فرآیند لاگین کاربر را نیز تکمیل می‌کند.";
             return operation;
         });
 
@@ -55,13 +55,8 @@ public static class RegisterDeviceEndpoints
 
         try
         {
-            var responseNode = await sepidarService.RegisterDeviceAsync(request.Serial, cancellationToken).ConfigureAwait(false);
-            if (responseNode is null)
-            {
-                return Results.NoContent();
-            }
-
-            return Results.Json(responseNode);
+            var response = await sepidarService.RegisterDeviceAndLoginAsync(request.Serial, cancellationToken).ConfigureAwait(false);
+            return Results.Json(response);
         }
         catch (ArgumentException ex)
         {
@@ -85,5 +80,4 @@ public static class RegisterDeviceEndpoints
     private static IResult RequirePostForRegister()
         => Results.BadRequest(new { message = "برای ثبت دستگاه از متد POST استفاده کنید." });
 
-    // caching handled inside SepidarService
 }
