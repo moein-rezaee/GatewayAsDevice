@@ -36,6 +36,7 @@ public class SepidarHeadersHandler : DelegatingHandler
         var normalizedPath = NormalizePath(rawPath);
 
         var requiresSession = !_noSessionPaths.Contains(normalizedPath);
+        _logger.LogInformation("SepidarHeadersHandler executing for {Method} {Path}. Requires session: {RequiresSession}", request.Method, normalizedPath, requiresSession);
 
         SepidarSession? session = null;
         if (requiresSession && (!_cache.TryGet<SepidarSession>("Sepidar:Session", out session) || session is null))

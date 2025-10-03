@@ -12,9 +12,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -29,9 +26,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -46,9 +40,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -63,9 +54,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -80,9 +68,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -97,9 +82,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -114,9 +96,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -131,9 +110,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -148,9 +124,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -165,9 +138,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -182,9 +152,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -199,9 +166,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -216,9 +180,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -233,9 +194,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -250,9 +208,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -267,9 +222,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -284,9 +236,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -301,9 +250,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -318,9 +264,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -335,9 +278,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -352,9 +292,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -369,9 +306,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -386,9 +320,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -403,9 +334,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -420,9 +348,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -437,9 +362,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -454,9 +376,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -471,9 +390,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -488,9 +404,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -505,9 +418,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -522,9 +432,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -539,9 +446,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     },
     {
@@ -556,9 +460,6 @@
           "Host": "178.131.66.32",
           "Port": 7373
         }
-      ],
-      "DelegatingHandlers": [
-        "SepidarGateway.Api.Handlers.SepidarHeadersHandler, GatewayAsDevice.Api"
       ]
     }
   ],
